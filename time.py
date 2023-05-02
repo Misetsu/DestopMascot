@@ -1,0 +1,2 @@
+def timeAct():
+    print("Time")

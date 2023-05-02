@@ -1,0 +1,112 @@
+import tkinter as tk
+
+class Mascot:
+
+    """
+     events
+    """
+    # These events handle dragging the window.
+    def doubleMouseDown(self, e):
+        if e.num == 1:
+            self.origin = (e.x, e.y)
+            self.isMouseDown = True
+
+    def doubleMouseRelease(self, e):
+        self.isMouseDown = False
+
+    def mouseMove(self, e):
+        if self.isMouseDown:
+            buf = self.root.geometry().split("+")
+            self.setPos(e.x - self.origin[0] + int(buf[1]),
+                        e.y - self.origin[1] + int(buf[2]),
+                        )
+
+    def leftMouseDown(self,e):
+        self.talk()
+
+    def rightMouseDown(self, e):
+        try:
+            self.popMenu.tk_popup(e.x_root, e.y_root)
+        finally:
+            self.popMenu.grab_release()
+
+    # The application is terminated by pressing the "ESC" key.
+    def keyRelease(self, e):
+        if e.keycode == 27:
+            self.quit()
+
+    """
+      main events
+    """
+    def popup(self):
+        self.popMenu = tk.Menu(self.root, tearoff = 0)
+        self.popMenu.add_command(label = "Time")
+        self.popMenu.add_command(label = "Memo")
+        self.popMenu.add_command(label = "Quit", command = lambda:self.quit())
+
+    def talk(self):
+        self.bubble = tk.Label(self.root, text = "text", width = 50).place(x = 0, y = 0)
+
+    def quit(self):
+        self.root.destroy()
+
+    """
+     set geometry, Position
+    """
+    def setPos(self, x, y):
+        self.root.geometry("+%s+%s" % (x, y))
+
+    """
+     load image, and drawing to canvas
+    """
+    def dispImage(self, path):
+        self.canvas.delete("all")
+        self.image = tk.PhotoImage(file = path)
+        self.canvas.create_image(0, 30, image = self.image, anchor = "nw")
+
+    """
+     create main window
+    """
+    def screenInit(self):
+        # Set window size
+        self.root.geometry("200x220")
+
+        # Create canvas and drawing image
+        self.canvas = tk.Canvas(self.root, bd = 0, highlightthickness = 0, bg = "#003300")
+        self.canvas.pack(fill = "both")
+        self.dispImage("izumi.png")
+
+        """
+         Various settings
+        """
+        # Transparency setting
+        self.root.wm_attributes("-transparentcolor", self.canvas["bg"])
+
+        # Disable window decoration
+        self.root.overrideredirect(True)
+
+        # Fix the screen to the front
+        self.root.attributes("-topmost", True)
+
+        """
+         Bind events
+        """
+        self.canvas.bind("<Double-Button-1>", self.doubleMouseDown)
+        self.canvas.bind("<ButtonRelease-1>", self.doubleMouseRelease)
+        self.canvas.bind("<Button-1>", self.leftMouseDown)
+        self.canvas.bind("<Button-3>", self.rightMouseDown)
+        self.canvas.bind("<Motion>", self.mouseMove)
+        self.root.bind_all("<KeyRelease>", self.keyRelease)
+
+
+    def __init__(self):
+        self.origin = (0, 0)
+        self.isMouseDown = False
+
+        self.root = tk.Tk()
+        self.screenInit()
+        self.popup()
+        self.root.mainloop()
+
+if __name__ == "__main__":
+    m = Mascot()
