@@ -8,6 +8,7 @@ import datetime
 
 
 class Window(QMainWindow):
+    #ウィンド初期化
     def __init__(self):
         super(Window, self).__init__()
 
@@ -17,14 +18,14 @@ class Window(QMainWindow):
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setGeometry(1500, 790, 300, 300)
         self.pixmap = QPixmap('izumi.png')
-        self.sub_window = ChatWindow()
-        self.sub_window.initUI()
+        self.sub_window = ChatWindow() #サブウィンド
 
         with open("data.txt", "r", encoding="utf-8") as f:
             text = f.read()
             self.sentence = text.split("\n")
         self.followMouse = False
 
+    #UI初期化
     def initUI(self):
         self.resize(300, 300)
         self.label1 = QLabel("", self)
@@ -70,8 +71,8 @@ class Window(QMainWindow):
         if action == timeAct:
             self.time()
         elif action == chatAct:
+            self.sub_window.initUI(mascot)
             self.sub_window.show()
-            #self.hide()
         elif action == quitAct:
             self.quit()
 

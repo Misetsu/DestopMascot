@@ -1,7 +1,7 @@
 import os
 import openai
 
-openai.api_key = "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"
+openai.api_key = "key"
 
 prompt = str(input("?"))
 
