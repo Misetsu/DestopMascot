@@ -1,17 +1,15 @@
-from PyQt5.QtCore    import Qt, QSize, QTimer
-from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QWidget, QPushButton, QGridLayout, QSpacerItem,
-                            QSizePolicy, QLabel, QApplication)
+from PyQt5.QtWidgets import *
+from PyQt5.QtCore import Qt, QTimer, QTime, QSize
+from PyQt5.QtGui import *
 
-
-class Dialog(QDialog):
-
+class Clock(QDialog):
     def __init__(self, *args, **kwargs):
-        super(Dialog, self).__init__(*args, **kwargs)
+        super(Clock, self).__init__(*args, **kwargs)
         self.setObjectName('Custom_Dialog')
         self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
+        self.setGeometry(1450, 680, 400, 100)
         self.setStyleSheet(Stylesheet)
-
         self.initUi()
 
     def initUi(self):
@@ -26,15 +24,26 @@ class Dialog(QDialog):
         layout.addItem(QSpacerItem(
             40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum), 0, 0)
         layout.addWidget(QPushButton('r', self, clicked=self.accept, objectName='closeButton'), 0, 1)
-        layout.addWidget(QLabel("<h2 style='color:blue;'>Hello, world!</h2>"), 2, 0, 5, 2, alignment=Qt.AlignCenter)                           
+        self.label = QLabel()
+        self.label.setAlignment(Qt.AlignCenter)
+        self.label.setFont(QFont('Arial', 30))
+        layout.addWidget(self.label)
+        self.setLayout(layout)
+        timer = QTimer(self)
+        timer.timeout.connect(self.showTime)
+        timer.start(1000)
+
+    def showTime(self):
+        current_time = QTime.currentTime()
+        label_time = current_time.toString("hh:mm:ss")
+        self.label.setText(label_time)
 
     def sizeHint(self):
-        return QSize(300, 380)        
-
+        return QSize(400, 100)
 
 Stylesheet = """
 #Custom_Widget {
-    background: #002025;
+    background: #FFFFFF;
     border-radius: 20px;
     opacity: 100;
     border: 2px solid #ff2025;                   
@@ -51,12 +60,3 @@ Stylesheet = """
     background: red;
 }
 """
-
-
-if __name__ == '__main__':
-    import sys
-    app = QApplication(sys.argv)
-    w = Dialog()
-    w.exec_()
-    QTimer.singleShot(200, app.quit)
-    sys.exit(app.exec_())

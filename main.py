@@ -3,8 +3,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import Qt
 from chat import ChatWindow
-import random
-import datetime
+from clock import Clock
 
 
 class Window(QMainWindow):
@@ -18,7 +17,8 @@ class Window(QMainWindow):
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setGeometry(1500, 790, 300, 300)
         self.pixmap = QPixmap('izumi.png')
-        self.sub_window = ChatWindow() #サブウィンド
+        self.sub_window = ChatWindow() #サブウィンド1
+        self.time_window = Clock() #サブウィンド2
 
         with open("data.txt", "r", encoding="utf-8") as f:
             text = f.read()
@@ -69,20 +69,12 @@ class Window(QMainWindow):
         quitAct = contextMenu.addAction("終了")
         action = contextMenu.exec_(self.mapToGlobal(e.pos()))
         if action == timeAct:
-            self.time()
+            self.time_window.show()
         elif action == chatAct:
             self.sub_window.initUI(mascot)
             self.sub_window.show()
         elif action == quitAct:
             self.quit()
-
-    def talk(self):
-        self.label1.setText(random.choice(self.sentence))
-        self.label1.move(0, 0)
-        self.label1.setStyleSheet("font: bold; background-color: white; color: black; "
-                                  "border: 3px solid #1C3561;")
-        self.label1.resize(300, 36)
-        self.label1.setWordWrap(True)
 
     def time(self):
         now = datetime.datetime.now()
