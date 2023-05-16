@@ -19,10 +19,6 @@ class Window(QMainWindow):
         self.pixmap = QPixmap('izumi.png')
         self.sub_window = ChatWindow() #サブウィンド1
         self.time_window = Clock() #サブウィンド2
-
-        with open("data.txt", "r", encoding="utf-8") as f:
-            text = f.read()
-            self.sentence = text.split("\n")
         self.followMouse = False
 
     #UI初期化
@@ -71,20 +67,10 @@ class Window(QMainWindow):
         if action == timeAct:
             self.time_window.show()
         elif action == chatAct:
-            self.sub_window.initUI(mascot)
+            self.sub_window.hide(mascot)
             self.sub_window.show()
         elif action == quitAct:
             self.quit()
-
-    def time(self):
-        now = datetime.datetime.now()
-        current_time = now.strftime("%H:%M:%S")
-        self.label1.setText(current_time)
-        self.label1.move(0, 0)
-        self.label1.setStyleSheet("font: bold; background-color: white; color: black; "
-                                  "border: 3px solid #1C3561;")
-        self.label1.resize(300, 36)
-        self.label1.setWordWrap(True)
 
 
 if __name__ == '__main__':

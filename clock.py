@@ -8,7 +8,7 @@ class Clock(QDialog):
         self.setObjectName('Custom_Dialog')
         self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
-        self.setGeometry(1450, 680, 400, 100)
+        self.setGeometry(1450, 710, 400, 100)
         self.setStyleSheet(Stylesheet)
         self.initUi()
 
@@ -21,13 +21,18 @@ class Clock(QDialog):
 
         # Add user interface to widget
         layout = QGridLayout(self.widget)
-        layout.addItem(QSpacerItem(
-            40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum), 0, 0)
-        layout.addWidget(QPushButton('r', self, clicked=self.accept, objectName='closeButton'), 0, 1)
+        layout.addItem(QSpacerItem(40, 20), 0, 0)
+        close = QPushButton("r", self)
+        close.clicked.connect(self.accept)
+        close.setObjectName("closeButton")
+        alarm = QPushButton("a", self)
+        alarm.setObjectName("alarmButton")
         self.label = QLabel()
         self.label.setAlignment(Qt.AlignCenter)
         self.label.setFont(QFont('Arial', 30))
-        layout.addWidget(self.label)
+        layout.addWidget(self.label, 0, 0, 2, 1)
+        layout.addWidget(close, 0, 1)
+        layout.addWidget(alarm, 1, 1)
         self.setLayout(layout)
         timer = QTimer(self)
         timer.timeout.connect(self.showTime)
@@ -43,14 +48,16 @@ class Clock(QDialog):
 
 Stylesheet = """
 #Custom_Widget {
-    background: #FFFFFF;
+    background: #CCC;
     border-radius: 20px;
     opacity: 100;
-    border: 2px solid #ff2025;                   
+    border: 3px solid #1c3561;                   
 }
 #closeButton {
     min-width: 36px;
     min-height: 36px;
+    max-width: 36px;
+    max-height: 36px;
     font-family: "Webdings";
     qproperty-text: "r";
     border-radius: 10px;
@@ -58,5 +65,18 @@ Stylesheet = """
 #closeButton:hover {
     color: #ccc;
     background: red;
+}
+#alarmButton {
+    min-width: 36px;
+    min-height: 36px;
+    max-width: 36px;
+    max-height: 36px;
+    font-family: "Webdings";
+    qproperty-text: "r";
+    border-radius: 10px;
+}
+#alarmButton:hover {
+    color: #ccc;
+    background: #1c3561;
 }
 """

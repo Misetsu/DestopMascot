@@ -1,6 +1,7 @@
 import os
 import openai
 
+
 openai.api_key = "key"
 
 prompt = str(input("?"))
