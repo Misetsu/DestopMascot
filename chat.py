@@ -49,7 +49,7 @@ class ChatWindow(QWidget):
         self.input.setText("")
 
     def keyPressEvent(self, e):
-        if e.key() == Qt.Key_Enter:
+        if (e.key() == Qt.Key_Return) or (e.key() == Qt.Key_Enter):
             self.get_input()
 
     def get_response(self):

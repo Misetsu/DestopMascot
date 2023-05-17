@@ -10,7 +10,7 @@ completion = openai.Completion.create(
   model="text-davinci-003",
   prompt=prompt,
   temperature=0.5,
-  max_tokens=1024,
+  max_tokens=150,
   n=1,
   stop=None
 )
