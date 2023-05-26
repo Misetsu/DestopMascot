@@ -1,62 +1,79 @@
-from PyQt5.QtCore    import Qt, QSize, QTimer
-from PyQt5.QtWidgets import (QDialog, QVBoxLayout, QWidget, QPushButton, QGridLayout, QSpacerItem,
-                            QSizePolicy, QLabel, QApplication)
+import sys
+from PyQt5.QtCore import *
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 
+class MyWidget(QWidget):
+    def __init__(self):
+        super(MyWidget, self).__init__()
+        # self.leftlist = QListWidget()
+        # self.leftlist.insertItem(0, 'Contact' )
+        # self.leftlist.insertItem(1, 'Personal' )
+        # self.leftlist.insertItem(2, 'Educational' )
 
-class Dialog(QDialog):
+        self.button = QPushButton("change")
+        self.button.clicked.connect(self.change_layout)
 
-    def __init__(self, *args, **kwargs):
-        super(Dialog, self).__init__(*args, **kwargs)
-        self.setObjectName('Custom_Dialog')
-        self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
-        self.setAttribute(Qt.WA_TranslucentBackground, True)
-        self.setStyleSheet(Stylesheet)
+        self.stack1 = QWidget()
+        self.stack2 = QWidget()
+        # self.stack3 = QWidget()
 
-        self.initUi()
+        self.stack1UI()
+        self.stack2UI()
+        # self.stack3UI()
 
-    def initUi(self):
-        # Important: this widget is used as background and rounded corners.
-        self.widget = QWidget(self)
-        self.widget.setObjectName('Custom_Widget')
-        layout = QVBoxLayout(self)
-        layout.addWidget(self.widget)
+        self.Stack = QStackedWidget (self)
+        self.Stack.addWidget (self.stack1)
+        self.Stack.addWidget (self.stack2)
+        # self.Stack.addWidget (self.stack3)
 
-        # Add user interface to widget
-        layout = QGridLayout(self.widget)
-        layout.addItem(QSpacerItem(
-            40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum), 0, 0)
-        layout.addWidget(QPushButton('r', self, clicked=self.accept, objectName='closeButton'), 0, 1)
-        layout.addWidget(QLabel("<h2 style='color:blue;'>Hello, world!</h2>"), 2, 0, 5, 2, alignment=Qt.AlignCenter)                           
+        hbox = QVBoxLayout(self)
+        hbox.addWidget(self.Stack)
+        # hbox.addWidget(self.leftlist)
+        hbox.addWidget(self.button)
 
-    def sizeHint(self):
-        return QSize(300, 380)        
+        self.setLayout(hbox)
+        # self.leftlist.currentRowChanged.connect(self.display)
+        self.setGeometry(300, 100, 50,50)
+        self.setWindowTitle('StackedWidget demo')
+        self.show()
 
+    def stack1UI(self):
+        layout = QFormLayout()
+        layout.addRow("Name",QLineEdit())
+        layout.addRow("Address",QLineEdit())
+        #self.setTabText(0,"Contact Details")
+        self.stack1.setLayout(layout)
 
-Stylesheet = """
-#Custom_Widget {
-    background: #002025;
-    border-radius: 20px;
-    opacity: 100;
-    border: 2px solid #ff2025;                   
-}
-#closeButton {
-    min-width: 36px;
-    min-height: 36px;
-    font-family: "Webdings";
-    qproperty-text: "r";
-    border-radius: 10px;
-}
-#closeButton:hover {
-    color: #ccc;
-    background: red;
-}
-"""
+    def stack2UI(self):
+        layout = QFormLayout()
+        sex = QHBoxLayout()
+        sex.addWidget(QRadioButton("Male"))
+        sex.addWidget(QRadioButton("Female"))
+        layout.addRow(QLabel("Sex"),sex)
+        layout.addRow("Date of Birth",QLineEdit())
+        self.stack2.setLayout(layout)
+
+    # def stack3UI(self):
+    #     layout = QHBoxLayout()
+    #     layout.addWidget(QLabel("subjects"))
+    #     layout.addWidget(QCheckBox("Physics"))
+    #     layout.addWidget(QCheckBox("Maths"))
+    #     self.stack3.setLayout(layout)
+
+    def display(self,i):
+        self.Stack.setCurrentIndex(i)
+
+    def change_layout(self):
+        i = self.Stack.currentIndex()
+        if i == 1:
+            self.Stack.setCurrentIndex(0)
+        else:
+            self.Stack.setCurrentIndex(1)
 
 
 if __name__ == '__main__':
-    import sys
     app = QApplication(sys.argv)
-    w = Dialog()
-    w.exec_()
-    QTimer.singleShot(200, app.quit)
+    widget = MyWidget()
+    widget.show()
     sys.exit(app.exec_())

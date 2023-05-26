@@ -1,51 +1,69 @@
+#ライブラリ
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import Qt, QTimer, QTime, QSize
+from PyQt5.QtCore import Qt, QTimer, QTime, QDateTime
 from PyQt5.QtGui import *
 
+
 class Clock(QDialog):
+    #ウィンドウ初期化
     def __init__(self, *args, **kwargs):
         super(Clock, self).__init__(*args, **kwargs)
         self.setObjectName('Custom_Dialog')
         self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.setAttribute(Qt.WA_TranslucentBackground, True)
-        self.setGeometry(1450, 710, 400, 100)
+        self.setGeometry(1450, 680, 400, 100)
         self.setStyleSheet(Stylesheet)
+        self.widget = QWidget(self)
         self.initUi()
 
+    #UI初期化
     def initUi(self):
-        # Important: this widget is used as background and rounded corners.
-        self.widget = QWidget(self)
+        #丸い角のウィンドを作る
         self.widget.setObjectName('Custom_Widget')
         layout = QVBoxLayout(self)
         layout.addWidget(self.widget)
 
-        # Add user interface to widget
+        #要素を追加
         layout = QGridLayout(self.widget)
         layout.addItem(QSpacerItem(40, 20), 0, 0)
+        #閉じるボタン
         close = QPushButton("r", self)
         close.clicked.connect(self.accept)
         close.setObjectName("closeButton")
+        #アラーム画面を開くボタン
         alarm = QPushButton("a", self)
-        alarm.setObjectName("alarmButton")
+        alarm.setObjectName("actionButton")
+        #カレンダー画面を開くボタン
+        calendar = QPushButton("c", self)
+        calendar.setObjectName("actionButton")
+        #時間ラベル
         self.label = QLabel()
         self.label.setAlignment(Qt.AlignCenter)
         self.label.setFont(QFont('Arial', 30))
-        layout.addWidget(self.label, 0, 0, 2, 1)
+        #日付ラベル
+        label1 = QLabel()
+        label1.setAlignment(Qt.AlignLeft)
+        label1.setFont(QFont('Arial', 12))
+        label1.setText(QDateTime.currentDateTime().toString("yyyy年MM月dd日"))
+        #レイアウト
+        layout.addWidget(label1, 0, 0, 1, 1)
+        layout.addWidget(self.label, 1, 0, 2, 1)
         layout.addWidget(close, 0, 1)
         layout.addWidget(alarm, 1, 1)
+        layout.addWidget(calendar, 2, 1)
         self.setLayout(layout)
+        #時間ループ
         timer = QTimer(self)
         timer.timeout.connect(self.showTime)
         timer.start(1000)
 
+    #時計を表示
     def showTime(self):
         current_time = QTime.currentTime()
         label_time = current_time.toString("hh:mm:ss")
         self.label.setText(label_time)
 
-    def sizeHint(self):
-        return QSize(400, 100)
-
+#CSS
 Stylesheet = """
 #Custom_Widget {
     background: #CCC;
@@ -54,10 +72,10 @@ Stylesheet = """
     border: 3px solid #1c3561;                   
 }
 #closeButton {
-    min-width: 36px;
-    min-height: 36px;
-    max-width: 36px;
-    max-height: 36px;
+    min-width: 30px;
+    min-height: 30px;
+    max-width: 30px;
+    max-height: 30px;
     font-family: "Webdings";
     qproperty-text: "r";
     border-radius: 10px;
@@ -66,16 +84,16 @@ Stylesheet = """
     color: #ccc;
     background: red;
 }
-#alarmButton {
-    min-width: 36px;
-    min-height: 36px;
-    max-width: 36px;
-    max-height: 36px;
+#actionButton {
+    min-width: 30px;
+    min-height: 30px;
+    max-width: 30px;
+    max-height: 30px;
     font-family: "Webdings";
     qproperty-text: "r";
     border-radius: 10px;
 }
-#alarmButton:hover {
+#actionButton:hover {
     color: #ccc;
     background: #1c3561;
 }

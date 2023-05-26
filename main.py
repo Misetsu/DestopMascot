@@ -1,3 +1,4 @@
+#ライブラリ
 import sys
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
@@ -17,46 +18,53 @@ class Window(QMainWindow):
         self.setAttribute(Qt.WA_TranslucentBackground)
         self.setGeometry(1500, 790, 300, 300)
         self.pixmap = QPixmap('izumi.png')
-        self.sub_window = ChatWindow() #サブウィンド1
+        self.chat_window = ChatWindow() #サブウィンド1
         self.time_window = Clock() #サブウィンド2
+
         self.followMouse = False
 
     #UI初期化
     def initUI(self):
         self.resize(300, 300)
-        self.label1 = QLabel("", self)
-        self.label1.setStyleSheet("font: 18pt; color: black;")
         self.label = QLabel("", self)
         self.label.setFixedSize(200, 200)
         self.label.move(50, 40)
         self.pixmap = QPixmap('izumi.png')
         self.label.setPixmap(self.pixmap)
 
+    #Escきーで終了
     def keyPressEvent(self, e):
         if e.key() == Qt.Key_Escape:
             self.quit()
 
+    #クリックイベント
     def mousePressEvent(self, e):
+        #左クリックで移動
         if e.button() == Qt.LeftButton:
             self.followMouse = True
             self.mouse_drag_pos = e.globalPos() - self.pos()
             e.accept()
             self.setCursor(QCursor(Qt.OpenHandCursor))
+        #右クリックでメニュー開く
         elif e.button() == Qt.RightButton:
             self.menu(e)
 
+    #移動
     def mouseMoveEvent(self, e):
         if Qt.LeftButton and self.followMouse:
             self.move(e.globalPos() - self.mouse_drag_pos)
             e.accept()
 
+    #クリック離す処理
     def mouseReleaseEvent(self, e):
         self.followMouse = False
         self.setCursor(QCursor(Qt.ArrowCursor))
 
+    #終了
     def quit(self):
         self.close()
 
+    #メニュー
     def menu(self, e):
         contextMenu = QMenu(self)
         timeAct = contextMenu.addAction("時間")
@@ -64,11 +72,12 @@ class Window(QMainWindow):
         chatAct = contextMenu.addAction("チャット")
         quitAct = contextMenu.addAction("終了")
         action = contextMenu.exec_(self.mapToGlobal(e.pos()))
+        #動作
         if action == timeAct:
             self.time_window.show()
         elif action == chatAct:
-            self.sub_window.hide(mascot)
-            self.sub_window.show()
+            self.chat_window.hide_main(mascot)
+            self.chat_window.show()
         elif action == quitAct:
             self.quit()
 
