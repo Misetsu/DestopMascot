@@ -1,79 +1,118 @@
 import sys
-from PyQt5.QtCore import *
-from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
+from PyQt5.QtCore import QTime
 
-class MyWidget(QWidget):
+class Window(QWidget):
     def __init__(self):
-        super(MyWidget, self).__init__()
-        # self.leftlist = QListWidget()
-        # self.leftlist.insertItem(0, 'Contact' )
-        # self.leftlist.insertItem(1, 'Personal' )
-        # self.leftlist.insertItem(2, 'Educational' )
+        super().__init__()
 
-        self.button = QPushButton("change")
-        self.button.clicked.connect(self.change_layout)
+        self.setWindowTitle("List Item with button")
+        self.setFixedSize(1000, 500)
 
-        self.stack1 = QWidget()
-        self.stack2 = QWidget()
-        # self.stack3 = QWidget()
+        self.alarm_list = ["06:30", "07:00", "07:15"]
+        self.on_alarm = []
 
-        self.stack1UI()
-        self.stack2UI()
-        # self.stack3UI()
+        self.time = QLabel()
 
-        self.Stack = QStackedWidget (self)
-        self.Stack.addWidget (self.stack1)
-        self.Stack.addWidget (self.stack2)
-        # self.Stack.addWidget (self.stack3)
+        self.time_edit = QTimeEdit()
+        self.time_edit.setTime(QTime.currentTime())
+        self.time_edit.setDisplayFormat("hh:mm")
 
-        hbox = QVBoxLayout(self)
-        hbox.addWidget(self.Stack)
-        # hbox.addWidget(self.leftlist)
-        hbox.addWidget(self.button)
+        self.add_alarm = QPushButton("Add")
+        self.add_alarm.clicked.connect(self.addAlarm)
 
-        self.setLayout(hbox)
-        # self.leftlist.currentRowChanged.connect(self.display)
-        self.setGeometry(300, 100, 50,50)
-        self.setWindowTitle('StackedWidget demo')
-        self.show()
+        self.Frame = QGroupBox()
+        self.FrameHorizontalLayout = QHBoxLayout(self.Frame)
+        self.ListWidget = QListWidget(self.Frame)
+        self.ListWidget.setSpacing(11)
+        self.ListWidget.setStyleSheet(
+            "QListWidget { background: palette(window); border: none;}"
+            "QListWidget::item {"
+            "border-style: solid;"
+            "border-width:1px;"
+            "border-color:  black;"
+            "margin-right: 30px;"
+            "}"
+            "QListWidget::item:hover {"
+            "border-color: blue;"
+            "}")
+        self.FrameHorizontalLayout.addWidget(self.ListWidget)
 
-    def stack1UI(self):
-        layout = QFormLayout()
-        layout.addRow("Name",QLineEdit())
-        layout.addRow("Address",QLineEdit())
-        #self.setTabText(0,"Contact Details")
-        self.stack1.setLayout(layout)
+        self.layout = QGridLayout(self)
+        self.layout.addWidget(self.time, 0, 0, 8, 4)
+        self.layout.addWidget(self.time_edit, 0, 4, 1, 3)
+        self.layout.addWidget(self.add_alarm, 0, 7, 1, 1)
+        self.layout.addWidget(self.Frame, 1, 4, 7, 4)
+        self.getAlarmList()
 
-    def stack2UI(self):
-        layout = QFormLayout()
-        sex = QHBoxLayout()
-        sex.addWidget(QRadioButton("Male"))
-        sex.addWidget(QRadioButton("Female"))
-        layout.addRow(QLabel("Sex"),sex)
-        layout.addRow("Date of Birth",QLineEdit())
-        self.stack2.setLayout(layout)
+    def getAlarmList(self):
+        for i in range(len(self.alarm_list)):
+            self.item = QListWidgetItem()
+            self.item_widget = QWidget()
+            self.line_text = QLabel(self.alarm_list[i])
+            self.line_push_button = QPushButton("Off")
+            self.line_push_button.setObjectName("switch " + str(i))
+            self.line_push_button.setCheckable(True)
+            if self.alarm_list[i] in self.on_alarm:
+                self.line_push_button.setChecked(True)
+                self.line_push_button.setText("On")
+            self.line_push_button.clicked.connect(self.clicked)
+            self.delete_button = QPushButton("X")
+            self.delete_button.setObjectName("del " + str(i))
+            self.delete_button.clicked.connect(self.delAlarm)
+            self.item_layout = QHBoxLayout()
+            self.item_layout.addWidget(self.line_text)
+            self.item_layout.addWidget(self.line_push_button)
+            self.item_layout.addWidget(self.delete_button)
+            self.item_widget.setLayout(self.item_layout)
+            self.item.setSizeHint(self.item_widget.sizeHint())
+            self.ListWidget.addItem(self.item)
+            self.ListWidget.setItemWidget(self.item, self.item_widget)
 
-    # def stack3UI(self):
-    #     layout = QHBoxLayout()
-    #     layout.addWidget(QLabel("subjects"))
-    #     layout.addWidget(QCheckBox("Physics"))
-    #     layout.addWidget(QCheckBox("Maths"))
-    #     self.stack3.setLayout(layout)
-
-    def display(self,i):
-        self.Stack.setCurrentIndex(i)
-
-    def change_layout(self):
-        i = self.Stack.currentIndex()
-        if i == 1:
-            self.Stack.setCurrentIndex(0)
+    def clicked(self):
+        sender = self.sender()
+        push_button = self.findChild(QPushButton, sender.objectName())
+        t, i = push_button.objectName().split(" ")
+        i = int(i)
+        if push_button.isChecked():
+            push_button.setText("On")
+            self.alarmOn(i)
         else:
-            self.Stack.setCurrentIndex(1)
+            push_button.setText("Off")
+            self.alarmOff(i)
+        print(self.on_alarm)
+
+    def alarmOn(self, i):
+        time_str = self.alarm_list[i]
+        self.on_alarm.append(time_str)
+
+    def alarmOff(self, i):
+        time_str = self.alarm_list[i]
+        try:
+            self.on_alarm.remove(time_str)
+        except:
+            pass
+
+    def addAlarm(self):
+        t = self.time_edit.time().toString()
+        t = t[:-3]
+        self.alarm_list.append(t)
+        self.ListWidget.clear()
+        self.getAlarmList()
+
+    def delAlarm(self):
+        sender = self.sender()
+        push_button = self.findChild(QPushButton, sender.objectName())
+        t, i = push_button.objectName().split(" ")
+        i = int(i)
+        self.alarmOff(i)
+        self.alarm_list.pop(i)
+        self.ListWidget.clear()
+        self.getAlarmList()
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    widget = MyWidget()
+    widget = Window()
     widget.show()
     sys.exit(app.exec_())

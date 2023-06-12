@@ -2,6 +2,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt, QTimer, QTime, QDateTime
 from PyQt5.QtGui import *
+from alarm import AlarmWindow
 
 
 class Clock(QDialog):
@@ -15,6 +16,8 @@ class Clock(QDialog):
         self.setStyleSheet(Stylesheet)
         self.widget = QWidget(self)
         self.initUi()
+
+        self.alarm_window = AlarmWindow()
 
     #UI初期化
     def initUi(self):
@@ -33,9 +36,11 @@ class Clock(QDialog):
         #アラーム画面を開くボタン
         alarm = QPushButton("a", self)
         alarm.setObjectName("actionButton")
+        alarm.clicked.connect(self.showAlarm)
         #カレンダー画面を開くボタン
         calendar = QPushButton("c", self)
         calendar.setObjectName("actionButton")
+        calendar.clicked.connect(self.showCalendar)
         #時間ラベル
         self.label = QLabel()
         self.label.setAlignment(Qt.AlignCenter)
@@ -62,6 +67,16 @@ class Clock(QDialog):
         current_time = QTime.currentTime()
         label_time = current_time.toString("hh:mm:ss")
         self.label.setText(label_time)
+
+    def showAlarm(self):
+        self.alarm_window.Stack.setCurrentIndex(1)
+        self.alarm_window.show()
+        self.close()
+
+    def showCalendar(self):
+        self.alarm_window.Stack.setCurrentIndex(0)
+        self.alarm_window.show()
+        self.close()
 
 #CSS
 Stylesheet = """

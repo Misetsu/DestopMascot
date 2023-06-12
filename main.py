@@ -5,6 +5,8 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import Qt
 from chat import ChatWindow
 from clock import Clock
+from memo import MemoWindow
+from alarm import AlarmWindow
 
 
 class Window(QMainWindow):
@@ -20,6 +22,8 @@ class Window(QMainWindow):
         self.pixmap = QPixmap('izumi.png')
         self.chat_window = ChatWindow() #サブウィンド1
         self.time_window = Clock() #サブウィンド2
+        self.memo_window = MemoWindow() #サブウィンド3
+        self.alarm_window = AlarmWindow() #サブウィンド4
 
         self.followMouse = False
 
@@ -78,6 +82,8 @@ class Window(QMainWindow):
         elif action == chatAct:
             self.chat_window.hide_main(mascot)
             self.chat_window.show()
+        elif action == memoAct:
+            self.memo_window.show()
         elif action == quitAct:
             self.quit()
 

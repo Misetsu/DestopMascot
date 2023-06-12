@@ -16,6 +16,7 @@ class ChatWindow(QWidget):
         self.setFixedSize(400, 600)
         self.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.setGeometry(1450, 430, 400, 600)
+        self.setWindowTitle("Chat Room")
         self.time_window = Clock()
         #コマンドラインを定義
         self.COMMAND = {
@@ -39,7 +40,6 @@ class ChatWindow(QWidget):
 
     #メイン画面を隠す
     def hide_main(self, mainwindow):
-        self.setWindowTitle("Chat Room")
         self.mainwindow = mainwindow  # メインウィンドを渡す
         mainwindow.hide()
 

@@ -1,168 +1,163 @@
-import sys
+# ライブラリ
 import os
 from PyQt5.QtWidgets import *
-from PyQt5.QtCore import QLocale
 from datetime import datetime
 
-class MyWidget(QWidget):
+memo_index = 0
+
+class MemoWindow(QWidget):
     # ウィンド初期化
     def __init__(self):
-        super(MyWidget, self).__init__()
+        super(MemoWindow, self).__init__()
 
+        self.initUI()
+        self.acceptDrops()
         self.setFixedSize(1000, 500)
-        self.button = QPushButton("change")
-        self.button.clicked.connect(self.changeLayout)
-
-        self.stack1 = QWidget() #画面1
-        self.stack2 = QWidget() #画面2
-
-        self.stack1UI()
-        self.stack2UI()
-
-        self.Stack = QStackedWidget(self)
-        self.Stack.addWidget(self.stack1)
-        self.Stack.addWidget(self.stack2)
-
-        layout = QGridLayout(self)
-        layout.addWidget(self.Stack, 2, 0, 1, 5)
-        layout.addWidget(self.button, 3, 4)
-        self.setLayout(layout)
-
-    # 画面切り替え動作
-    def changeLayout(self):
-        i = self.Stack.currentIndex()
-        if i == 1:
-            self.Stack.setCurrentIndex(0)
-        else:
-            self.Stack.setCurrentIndex(1)
-
-    # 画面1UI
-    def stack1UI(self):
-        self.cal = QCalendarWidget(self)
-        self.cal.setLocale(QLocale(QLocale.Japanese))
-        self.cal.setGridVisible(True)
-        self.cal.selectionChanged.connect(self.dateChange)
-
-        self.tasklist = QListWidget()
-
-        layout = QHBoxLayout()
-        layout.addWidget(self.cal, 2)
-        layout.addWidget(self.tasklist, 2)
-
-        self.stack1.setLayout(layout)
-
-    def dateChange(self):
-        pass
+        self.setWindowTitle("Memo")
 
     # 画面2UI
-    def stack2UI(self):
+    def initUI(self):
         self.memolist = QListWidget()
         self.getSummary()
         self.memolist.itemClicked.connect(self.changeMemo)
+        self.memolist.setCurrentRow(0)
 
         self.memopad = QTextEdit()
+        try:
+            cwd = os.getcwd()
+            cwd = cwd + "/memo"
+            l = [f for f in os.listdir(cwd) if f.endswith("memo.txt")]
+            p = cwd + "/" + l[0]
+            # Read & write
+            with open(p, "r+", encoding="utf-8") as file:
+                data = file.read()
+            self.memopad.setPlainText(data)
+        except:
+            self.memopad.setPlainText("メモがないよ\nAddボタンでメモを追加してね")
 
         self.add = QPushButton("Add")
         self.add.clicked.connect(self.addMemo)
-        self.save = QPushButton("Save")
-        self.save.clicked.connect(self.saveMemo)
         self.delete = QPushButton("Delete")
         self.delete.clicked.connect(self.deleteMemo)
 
         layout = QGridLayout()
-        layout.addWidget(self.add, 0, 5)
-        layout.addWidget(self.save, 0, 6)
+        layout.addWidget(self.add, 0, 6)
         layout.addWidget(self.delete, 0, 7)
         layout.addWidget(self.memolist, 1, 0, 1, 3)
         layout.addWidget(self.memopad, 1, 3, 1, 5)
-        self.stack2.setLayout(layout)
+        self.setLayout(layout)
+
+        self.changeMemo()
+
+    # ウィンド閉じる時の動作
+    def closeEvent(self, e):
+        self.saveMemo()
+        self.getSummary()
+        self.close()
 
     # メモの目次を取得
     def getSummary(self):
+        global memo_index
         # ファイルの場所を取得
         summary = []
         cwd = os.getcwd()
         cwd = cwd + "/memo"
-        l = [f for f in os.listdir(cwd) if f.endswith(".txt")]
+        l = [f for f in os.listdir(cwd) if f.endswith("memo.txt")]
         for i in l:
             p = cwd + "/" + i
             # Read only
-            with open(p, "r") as file:
+            with open(p, "r", encoding="utf-8") as file:
                 first_line = file.readline().strip('\n') # 1行目
             summary.append(first_line)
         # 更新
         self.memolist.clear()
         self.memolist.addItems(summary)
+        self.memolist.setCurrentRow(memo_index)
 
     # 表示するメモをかえる
     def changeMemo(self):
-        # ファイルの場所を取得
-        i = int(self.memolist.currentRow())
-        cwd = os.getcwd()
-        cwd = cwd + "/memo"
-        l = [f for f in os.listdir(cwd) if f.endswith(".txt")]
-        p = cwd + "/" + l[i]
-        # Read & write
-        with open(p, "r+") as file:
-            data = file.read()
-        self.memopad.setPlainText(data)
+        global memo_index
+        self.saveMemo()
+        try:
+            # ファイルの場所を取得
+            i = int(self.memolist.currentRow())
+            memo_index = i
+            cwd = os.getcwd()
+            cwd = cwd + "/memo"
+            l = [f for f in os.listdir(cwd) if f.endswith("memo.txt")]
+            p = cwd + "/" + l[i]
+            # Read & write
+            with open(p, "r+", encoding="utf-8") as file:
+                data = file.read()
+            self.memopad.setPlainText(data)
+            self.getSummary()
+        except:
+            pass
 
     # メモを追加
     def addMemo(self):
+        global memo_index
+        self.saveMemo()
         # ファイルの場所を取得
         t = datetime.now()
         ct = t.strftime("%Y%m%d%H%M%S")
-        name = "memo" + ct + ".txt"
+        name = ct + "memo.txt"
         cwd = os.getcwd()
         cwd = cwd + "/memo"
         p = cwd + "/" + name
         try:
-            open(p, "x")
-            l = [f for f in os.listdir(cwd) if f.endswith(".txt")]
+            open(p, "x", encoding="utf-8")
+            l = [f for f in os.listdir(cwd) if f.endswith("memo.txt")]
             for i in range(len(l)):
                 if l[i].endswith(name):
                     break
             self.memolist.setCurrentRow(i)
+            memo_index = i
+            self.memopad.setPlainText("")
             self.changeMemo()
-        finally:
-            self.getSummary()
-            self.memolist.setCurrentRow(i)
+        except:
+            pass
 
-    # メモを保存
+    # メモを保存　自動保存
     def saveMemo(self):
-        # ファイルの場所を取得
-        i = int(self.memolist.currentRow())
-        cwd = os.getcwd()
-        cwd = cwd + "/memo"
-        l = [f for f in os.listdir(cwd) if f.endswith(".txt")]
-        p = cwd + "/" + l[i]
-        # Overwrite
-        with open(p, "w") as file:
-            file.write(self.memopad.toPlainText())
-        # 更新
-        self.getSummary()
-        self.memolist.setCurrentRow(i)
-        self.changeMemo()
+        global memo_index
+        try:
+            # ファイルの場所を取得
+            i = int(self.memolist.currentRow())
+            cwd = os.getcwd()
+            cwd = cwd + "/memo"
+            l = [f for f in os.listdir(cwd) if f.endswith("memo.txt")]
+            p = cwd + "/" + l[memo_index]
+            # Overwrite
+            with open(p, "w", encoding="utf-8") as file:
+                file.write(self.memopad.toPlainText())
+        except:
+            pass
 
     # メモを削除
     def deleteMemo(self):
+        global memo_index
         # ファイルの場所を取得
         i = int(self.memolist.currentRow())
         cwd = os.getcwd()
         cwd = cwd + "/memo"
-        l = [f for f in os.listdir(cwd) if f.endswith(".txt")]
+        l = [f for f in os.listdir(cwd) if f.endswith("memo.txt")]
         p = cwd + "/" + l[i]
         # ファイルがあるかチェック
         if os.path.exists(p):
             os.remove(p)
         # 更新
-        self.getSummary()
-        self.memolist.setCurrentRow(0)
-        self.changeMemo()
-
-
-if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    widget = MyWidget()
-    widget.show()
-    sys.exit(app.exec_())
+        try:
+            memo_index = 0
+            cwd = os.getcwd()
+            cwd = cwd + "/memo"
+            l = [f for f in os.listdir(cwd) if f.endswith("memo.txt")]
+            p = cwd + "/" + l[0]
+            # Read & write
+            with open(p, "r+", encoding="utf-8") as file:
+                data = file.read()
+            self.memopad.setPlainText(data)
+            self.getSummary()
+        except:
+            self.getSummary()
+            self.memopad.setPlainText("メモがないよ\nAddボタンでメモを追加してね")
