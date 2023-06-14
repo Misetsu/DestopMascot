@@ -1,10 +1,15 @@
 #ライブラリ
 import os
+import winsound
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import QLocale, QDate, Qt, QTimer, QTime
+from PyQt5.QtGui import QFont
 
 date_index = QDate.currentDate()
 date_index = date_index.toString("yyyyMMdd")
+alarm_list = []
+on_alarm = []
+on_time = []
 
 class AlarmWindow(QWidget):
     # ウィンド初期化
@@ -41,6 +46,14 @@ class AlarmWindow(QWidget):
             self.saveTask()
             self.Stack.setCurrentIndex(1)
 
+    # ウィンドを閉じる時の動作
+    # 自動保存
+    def closeEvent(self, e):
+        self.saveDiary()
+        self.saveTask()
+        self.saveAlarm()
+        self.close()
+
     # 画面1UI
     def stack1UI(self):
         self.cal = QCalendarWidget(self)
@@ -63,17 +76,11 @@ class AlarmWindow(QWidget):
         layout.addWidget(self.add, 4, 7)
         layout.addWidget(self.task, 5, 4, 3, 4)
 
+        # 初期画面の読み込み
         self.getDiary()
         self.getTask()
         self.dateChange()
         self.stack1.setLayout(layout)
-
-    # ウィンドを閉じる時の動作
-    def closeEvent(self, e):
-        self.saveDiary()
-        self.saveTask()
-        self.saveAlarm()
-        self.close()
 
     # 日付切り替え動作
     def dateChange(self):
@@ -181,20 +188,24 @@ class AlarmWindow(QWidget):
 
     # 画面2UI
     def stack2UI(self):
-        self.alarm_list = []
-        self.on_alarm = []
+        global alarm_list, on_alarm, on_time
+        alarm_list = []
+        on_alarm = []
         cwd = os.getcwd()
         cwd = cwd + "/calendar"
         p = cwd + "/alarm.txt"
+        # 保存しているアラームを取得
         try:
             with open(p, "r+", encoding="utf-8") as file:
                 lines = [line.rstrip() for line in file]
-            self.alarm_list = lines[0].split(" ")
-            self.on_alarm = lines[1].split(" ")
+            alarm_list = lines[0].split(" ")
+            on_alarm = lines[1].split(" ")
+            on_time = lines[2].split(" ")
         finally:
             pass
 
         self.time = QLabel()
+        self.time.setFont(QFont('Arial', 30))
         self.time.setAlignment(Qt.AlignCenter)
 
         self.time_edit = QTimeEdit()
@@ -239,15 +250,18 @@ class AlarmWindow(QWidget):
         label_time = current_time.toString("hh:mm:ss")
         self.time.setText(label_time)
 
+    # アラームを表示
     def getAlarmList(self):
-        for i in range(len(self.alarm_list)):
+        global alarm_list, on_alarm
+        # ループでlist itemを作る
+        for i in range(len(alarm_list)):
             self.item = QListWidgetItem()
             self.item_widget = QWidget()
-            self.line_text = QLabel(self.alarm_list[i])
+            self.line_text = QLabel(alarm_list[i])
             self.line_push_button = QPushButton("Off")
             self.line_push_button.setObjectName("switch " + str(i))
             self.line_push_button.setCheckable(True)
-            if self.alarm_list[i] in self.on_alarm:
+            if alarm_list[i] in on_alarm:
                 self.line_push_button.setChecked(True)
                 self.line_push_button.setText("On")
             self.line_push_button.clicked.connect(self.clicked)
@@ -263,6 +277,7 @@ class AlarmWindow(QWidget):
             self.ListWidget.addItem(self.item)
             self.ListWidget.setItemWidget(self.item, self.item_widget)
 
+    # アラームをオンオフ
     def clicked(self):
         sender = self.sender()
         push_button = self.findChild(QPushButton, sender.objectName())
@@ -275,40 +290,60 @@ class AlarmWindow(QWidget):
             push_button.setText("Off")
             self.alarmOff(i)
 
+    # アラームをオンにする
     def alarmOn(self, i):
-        time_str = self.alarm_list[i]
-        self.on_alarm.append(time_str)
+        global alarm_list, on_alarm, on_time
+        time_str = str(alarm_list[i])
+        on_alarm.append(time_str)
+        time_str = time_str + ":00"
+        on_time.append(time_str)
 
+    # アラームをオフにする
     def alarmOff(self, i):
-        time_str = self.alarm_list[i]
+        global alarm_list,on_alarm, on_time
+        time_str = alarm_list[i]
         try:
-            self.on_alarm.remove(time_str)
+            on_alarm.remove(time_str)
+        except:
+            pass
+        time_str = str(time_str) + ":00"
+        try:
+            on_time.remove(time_str)
         except:
             pass
 
+    # アラームを追加
     def addAlarm(self):
+        global alarm_list
         t = self.time_edit.time().toString()
         t = t[:-3]
-        self.alarm_list.append(t)
+        alarm_list.append(t)
         self.ListWidget.clear()
         self.getAlarmList()
 
+    # アラームを削除
     def delAlarm(self):
+        global alarm_list
         sender = self.sender()
         push_button = self.findChild(QPushButton, sender.objectName())
         t, i = push_button.objectName().split(" ")
         i = int(i)
         self.alarmOff(i)
-        self.alarm_list.pop(i)
+        alarm_list.pop(i)
         self.ListWidget.clear()
         self.getAlarmList()
 
+    # アラームを保存
     def saveAlarm(self):
+        global alarm_list, on_alarm, on_time
         data = ""
-        for i in self.alarm_list:
+        for i in alarm_list:
             data = data + i + " "
         data = data + "\n"
-        for i in self.on_alarm:
+        for i in on_alarm:
+            data = data + i + " "
+        data = data + "\n"
+        for i in on_time:
             data = data + i + " "
         data = data + "\n"
         cwd = os.getcwd()

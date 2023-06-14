@@ -54,8 +54,8 @@ class Clock(QDialog):
         layout.addWidget(label1, 0, 0, 1, 1)
         layout.addWidget(self.label, 1, 0, 2, 1)
         layout.addWidget(close, 0, 1)
-        layout.addWidget(alarm, 1, 1)
-        layout.addWidget(calendar, 2, 1)
+        layout.addWidget(calendar, 1, 1)
+        layout.addWidget(alarm, 2, 1)
         self.setLayout(layout)
         #時間ループ
         timer = QTimer(self)

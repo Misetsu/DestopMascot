@@ -1,12 +1,15 @@
 #ライブラリ
+import os
 import sys
+import winsound
+
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer, QTime
 from chat import ChatWindow
 from clock import Clock
 from memo import MemoWindow
-from alarm import AlarmWindow
+import alarm
 
 
 class Window(QMainWindow):
@@ -23,7 +26,7 @@ class Window(QMainWindow):
         self.chat_window = ChatWindow() #サブウィンド1
         self.time_window = Clock() #サブウィンド2
         self.memo_window = MemoWindow() #サブウィンド3
-        self.alarm_window = AlarmWindow() #サブウィンド4
+        self.alarm_window = alarm.AlarmWindow() #サブウィンド4
 
         self.followMouse = False
 
@@ -35,6 +38,10 @@ class Window(QMainWindow):
         self.label.move(50, 40)
         self.pixmap = QPixmap('izumi.png')
         self.label.setPixmap(self.pixmap)
+
+        timer = QTimer(self)
+        timer.timeout.connect(self.onTime)
+        timer.start(1000)
 
     #Escきーで終了
     def keyPressEvent(self, e):
@@ -86,6 +93,30 @@ class Window(QMainWindow):
             self.memo_window.show()
         elif action == quitAct:
             self.quit()
+
+    # アラームをチェック
+    def onTime(self):
+        current_time = QTime.currentTime()
+        current_time = current_time.toString("hh:mm:ss")
+        if current_time in alarm.on_time:
+            cwd = os.getcwd()
+            p = cwd + "/Alarm03.wav"
+            winsound.PlaySound(p, winsound.SND_ASYNC + winsound.SND_LOOP)
+            self.alarmMessage()
+
+    # アラームのメッセージを表示
+    def alarmMessage(self):
+        self.msg = QMessageBox()
+        self.msg.setIcon(QMessageBox.Information)
+        self.msg.setWindowTitle("アラーム")
+        self.msg.setText("時間だよ～起きろ！動け！")
+        self.msg.setStandardButtons(QMessageBox.Ok)
+        self.msg.buttonClicked.connect(self.offSound)
+        self.msg.show()
+
+    # 音を消す
+    def offSound(self):
+        winsound.PlaySound(None, winsound.SND_ASYNC)
 
 
 if __name__ == '__main__':

@@ -3,6 +3,9 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtCore import Qt
 from datetime import datetime
 from clock import Clock
+from memo import MemoWindow
+import alarm
+
 
 text = "" #入力
 
@@ -18,10 +21,15 @@ class ChatWindow(QWidget):
         self.setGeometry(1450, 430, 400, 600)
         self.setWindowTitle("Chat Room")
         self.time_window = Clock()
+        self.memo_window = MemoWindow()
+        self.alarm_window = alarm.AlarmWindow()
         #コマンドラインを定義
         self.COMMAND = {
             "/time": self.handle_time,
-            "/openTimeWin": self.handle_openTimeWin,
+            "/openTime": self.handle_openTime,
+            "/openCalendar": self.handle_openCalendar,
+            "/openAlarm": self.handle_openAlarm,
+            "/openMemo": self.handle_openMemo,
             "/help": self.handle_help
         }
 
@@ -81,17 +89,38 @@ class ChatWindow(QWidget):
         t = datetime.now()
         ct = t.strftime("%Y年%m月%d日の%H時%M分")
         self.history.setText(self.history.toPlainText() + "今は" + ct
-                             + "\n時計の画面開く？\n/openTimeWin で開けるよ\n")
+                             + "\n時計の画面開く？\n/openTime で開けるよ\n")
 
-    #/openTimeWinのコマンド動作
-    def handle_openTimeWin(self):
+    #/openTimeのコマンド動作
+    def handle_openTime(self):
         self.time_window.show()
+        self.close()
+
+    # /openCalendarのコマンド動作
+    def handle_openCalendar(self):
+        self.alarm_window.Stack.setCurrentIndex(0)
+        self.alarm_window.show()
+        self.close()
+
+    # /openAlarmのコマンド動作
+    def handle_openAlarm(self):
+        self.alarm_window.Stack.setCurrentIndex(1)
+        self.alarm_window.show()
+        self.close()
+
+    # /openMemoのコマンド動作
+    def handle_openMemo(self):
+        self.memo_window.show()
         self.close()
 
     #/helpのコマンド動作
     def handle_help(self):
         self.history.setText(self.history.toPlainText() + "コマンド一覧：\n/time：現在時刻をチェック\n"
-                             + "/openTimeWin：時間ウィンドを開く\n/help：これ\n")
+                             + "/openTime：時間ウィンドを開く\n"
+                             + "/openCalendar：日記とタスクウィンドを開く\n"
+                             + "/openAlarm：アラームウィンドを開く\n"
+                             + "/openMemoメモ機能を開く\n"
+                             + "/help：これ\n以上！\n")
 
     #AIで返事を取得
     def get_ai(self):
